@@ -14,31 +14,35 @@ typedef struct struct_message {
 struct_message myData;
 
 #define led 8
+#define buzzer 0
+
+bool buzzerState = false; // State of the buzzer
  
 unsigned long previousMillis = 0; // Store the last time LED was updated 
 
 
-void toggleLED(bool o) {
-  digitalWrite(led, o ? HIGH : LOW);
-
-  }
 // Callback function executed when data is received
 void OnDataRecv(const uint8_t * mac, const uint8_t *incomingData, int len) {
   memcpy(&myData, incomingData, sizeof(myData));
-  Serial.print("Data received: ");
-  Serial.println(len);
+  // Serial.print("Data received: ");
+  // Serial.println(len);
   // Serial.print("Character Value: ");
   // Serial.println(myData.a);
-  Serial.print("Integer Value: ");
-  Serial.println(myData.b);
+  // Serial.print("Integer Value: ");
+  // Serial.println(myData.b);
+
+  int save;
+
+  buzzerState = myData.b; // Update buzzer state based on received data
+  if (buzzerState && myData.b != save) {
+    previousMillis = millis();
+    save = myData.b;
+  }
   // Serial.print("Float Value: ");
   // Serial.println(myData.c);
   // Serial.print("Boolean Value: ");
   // Serial.println(myData.d);
   // bool status = myData.d;
-  // if (myData.d == true) {
-  //   previousMillis = millis();
-  // }
   Serial.println();
 }
  
@@ -47,6 +51,7 @@ void setup() {
   Serial.begin(115200);
 
   pinMode(led, OUTPUT);
+  pinMode(buzzer, OUTPUT);
   
   // Set ESP32 as a Wi-Fi Station
   WiFi.mode(WIFI_STA);
@@ -62,14 +67,14 @@ void setup() {
 }
  
 void loop() {
-  // if (millis() - previousMillis <= 10000)
-  // {
-  //   toggleLED(false);
-  // } 
-  // else 
-  // {
-  //   toggleLED(true);
-  // }
+  if (buzzerState) {
+    digitalWrite(buzzer, HIGH); // Turn on buzzer
+  } else {
+    digitalWrite(buzzer, LOW); // Turn off buzzer
+  }
   
- 
+    if (millis() - previousMillis <= 5000)
+  {
+    digitalWrite(led, LOW);
+  } 
 }

@@ -78,7 +78,7 @@ void loop() {
   
   // Format structured data
   // strcpy(myData.a, "Welcome to the Workshop!");
-  myData.b = int_value;
+  myData.b = !int_value;
   // myData.c = float_value;
   // myData.d = a;
 
