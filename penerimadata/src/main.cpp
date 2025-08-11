@@ -6,7 +6,7 @@
 typedef struct struct_message {
   // char a[32];
   int b;
-  // float c;
+  int c;
   // bool d;
 } struct_message;
  
@@ -14,10 +14,17 @@ typedef struct struct_message {
 struct_message myData;
 
 #define led 8
-#define buzzer 0
+#define dim 0
+#define relay2 1
 
-bool buzzerState = false; // State of the buzzer
- 
+bool buzzerState = LOW;
+bool saklar = LOW;
+
+// anti bounce variables
+bool saklarbounce = HIGH;
+bool dimbounce = HIGH;
+
+
 unsigned long previousMillis = 0; // Store the last time LED was updated 
 
 
@@ -31,19 +38,17 @@ void OnDataRecv(const uint8_t * mac, const uint8_t *incomingData, int len) {
   // Serial.print("Integer Value: ");
   // Serial.println(myData.b);
 
-  int save;
+  // saklar dim
+  buzzerState = myData.b;
 
-  buzzerState = myData.b; // Update buzzer state based on received data
-  if (buzzerState && myData.b != save) {
-    previousMillis = millis();
-    save = myData.b;
-  }
-  // Serial.print("Float Value: ");
+  // saklar
+  saklar = myData.c;
   // Serial.println(myData.c);
+
   // Serial.print("Boolean Value: ");
   // Serial.println(myData.d);
   // bool status = myData.d;
-  Serial.println();
+  // Serial.println();
 }
  
 void setup() {
@@ -51,7 +56,11 @@ void setup() {
   Serial.begin(115200);
 
   pinMode(led, OUTPUT);
-  pinMode(buzzer, OUTPUT);
+  pinMode(dim, OUTPUT);
+  pinMode(relay2, OUTPUT);
+
+  digitalWrite(dim, LOW);
+  digitalWrite(relay2, LOW);
   
   // Set ESP32 as a Wi-Fi Station
   WiFi.mode(WIFI_STA);
@@ -65,16 +74,32 @@ void setup() {
   // Register callback function
   esp_now_register_recv_cb(OnDataRecv);
 }
- 
+
+bool saklarState = false;
+
 void loop() {
   if (buzzerState) {
-    digitalWrite(buzzer, HIGH); // Turn on buzzer
+    digitalWrite(dim, HIGH); 
   } else {
-    digitalWrite(buzzer, LOW); // Turn off buzzer
+    digitalWrite(dim, LOW); 
+  }
+
+  if (buzzerState == HIGH && dimbounce == LOW)
+  {
+    previousMillis = millis();
   }
   
-    if (millis() - previousMillis <= 5000)
+  dimbounce = buzzerState;
+
+  if (saklar == HIGH && saklarbounce == LOW) {
+    saklarState = !saklarState;
+    digitalWrite(relay2, saklarState ? HIGH : LOW);
+  }
+  saklarbounce = saklar;
+
+
+    if (millis() - previousMillis >= 5000 && buzzerState == HIGH) 
   {
-    digitalWrite(led, LOW);
+    buzzerState = LOW;
   } 
 }

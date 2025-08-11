@@ -2,12 +2,15 @@
 #include <esp_now.h>
 #include <WiFi.h>
 
+// tombol dim
 #define btn 0
+
+// saklar 
+#define btn2 1
  
 // Variables for test data
-int int_value;
-float float_value;
-bool bool_value = true;
+int int_saklar;
+int int_dim;
  
 // MAC Address of responder - edit as required
 uint8_t broadcastAddress[] = {0x18, 0x8B, 0x0E, 0x2C, 0x24, 0xC8};
@@ -16,6 +19,7 @@ uint8_t broadcastAddress[] = {0x18, 0x8B, 0x0E, 0x2C, 0x24, 0xC8};
 typedef struct struct_message {
   // char a[32];
   int b;
+  int c;
   // float c;
   // bool d;
 } struct_message;
@@ -38,6 +42,7 @@ void setup() {
   Serial.begin(115200);
 
   pinMode(btn, INPUT_PULLUP);
+  pinMode(btn2, INPUT_PULLUP);
  
   // Set ESP32 as a Wi-Fi Station
   WiFi.mode(WIFI_STA);
@@ -67,8 +72,9 @@ void loop() {
  
   // Create test data
  
-  // Generate a random integer
-  int_value = digitalRead(btn);
+  // tombol dim
+  int_dim = digitalRead(btn);
+  int_saklar = digitalRead(btn2);
  
   // Use integer to make a new float
   // float_value = 1.3 * int_value;
@@ -78,8 +84,9 @@ void loop() {
   
   // Format structured data
   // strcpy(myData.a, "Welcome to the Workshop!");
-  myData.b = !int_value;
-  // myData.c = float_value;
+  myData.b = !int_dim;
+  myData.c = !int_saklar;
+  // Serial.println(myData.c);
   // myData.d = a;
 
   // Serial.print("Sending data: ");
